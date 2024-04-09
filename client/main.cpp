@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 10:36:37
+ * @LastEditTime: 2024-04-09 11:30:14
  * @Description: udp通信客户端
  */
 #include <cstdio>
@@ -67,12 +67,13 @@ int main(int argc, char **argv)
     vector<uint8_t> buf(WIDTH*HEIGHT*3/2+2);
     uint8_t *data = buf.data() + 2; // udp在应用层分包sendto，buf[0] is cmd, buf[1] is 帧数量或帧序号
 
-    for (size_t i = 0; i < 20; i++)
+    // for (size_t i = 0; i < 20; i++)
+    while (1)
     {
         camera_capture(data, &frameLen);
 
-        snprintf(name, sizeof(name), "frame_%lu.jpg", i);
-        save_data_to_file(data, frameLen, name);
+        // snprintf(name, sizeof(name), "frame_%lu.jpg", i);
+        // save_data_to_file(data, frameLen, name);
 
         frameCount++;
         printf("JH ---frameLen:%d frameCount:%lu\n", frameLen, frameCount);
