@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 09:21:50
+ * @LastEditTime: 2024-04-09 11:02:34
  * @Description: udp通信客户端
  */
 #include<errno.h>
@@ -20,6 +20,14 @@
 #include "udp_client.h"
 
 #define PORT 9999
+
+/**
+ * @brief 包头类型
+ */
+enum {
+    PACKET_FIRST = 0xF1,        // 第一个包
+    PACKET_INTERMEDATE = 0xF2,  // 中间包
+};
 
 UdpClient::UdpClient(const char* ip, int port)
 {
@@ -42,7 +50,7 @@ UdpClient::~UdpClient()
     close(sockfd_);
 }
 
-int UdpClient::send(const uint8_t* data, uint32_t len)
+int UdpClient::send(uint8_t* data, uint32_t len)
 {
     if (sockfd_ < 0 || nullptr == data || 0 == len)
     {
@@ -50,8 +58,41 @@ int UdpClient::send(const uint8_t* data, uint32_t len)
         return -1;
     }
 
-    printf("send data len: %d\n", len);
-    return sendto(sockfd_, data, len, 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
+    uint32_t sequence = 0;
+    uint32_t sendLen = -1;
+    uint32_t sendedLen = 0;
+    while (sendedLen < len)
+    {
+        sequence++;
+        sendLen = (len - sendedLen) > UDP_MAX_DATA_LEN ? UDP_MAX_DATA_LEN : (len - sendedLen);
+
+        if (sendedLen == 0) // 第一个包，类型+总包数+数据
+        {
+            *(data - 2) = PACKET_FIRST;
+            *(data - 1) = len/UDP_MAX_DATA_LEN;
+            if (len%UDP_MAX_DATA_LEN)
+            {
+                *(data - 1) += 1;
+            }
+        }
+        else                // 中间包，类型+包序号+数据
+        {
+            *(data + sendedLen - 2) = PACKET_INTERMEDATE;
+            *(data + sendedLen - 1) = sequence;
+        }
+
+        int ret = sendto(sockfd_, data + sendedLen - 2, sendLen + 2, 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
+        if (ret < 0)
+        {
+            printf("sendto fail, errno: %d\n", errno);
+            return -1;
+        }
+        sendedLen += (ret - 2); // 2 bytes for packet header
+
+        printf("send[%d] bytes, sendedLen[%u] bytes sequence:[%u]\n", ret, sendedLen, sequence);
+    }
+    return sendedLen;
+    // return sendto(sockfd_, data, len, 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
 }
 
 int UdpClient::recv(uint8_t* data, uint32_t len)

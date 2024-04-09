@@ -3,13 +3,14 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 09:19:19
+ * @LastEditTime: 2024-04-09 10:36:37
  * @Description: udp通信客户端
  */
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 extern "C" {
 #include <sys/time.h>
@@ -23,9 +24,6 @@ using namespace std;
 #define WIDTH 1920
 #define HEIGHT 1080
 
-uint8_t *grayData = nullptr;
-uint8_t *grayData_t = nullptr;
-
 bool save_data_to_file(unsigned char *data, uint32_t len, const char *name)
 {
     FILE *fp = fopen(name, "wb");
@@ -35,9 +33,8 @@ bool save_data_to_file(unsigned char *data, uint32_t len, const char *name)
         return false;
     }
 
-    fwrite(grayData, 1, len, fp);
+    fwrite(data, 1, len, fp);
     fclose(fp);
-
     return true;
 }
 
@@ -63,27 +60,24 @@ int main(int argc, char **argv)
 
     int frameLen = 0;
     uint64_t frameCount = 0;
-    grayData = (uint8_t*)malloc(WIDTH*HEIGHT*3/2);
 
     char name[128] = {0};
 
     auto udpClient = make_shared<UdpClient>(argv[2], atoi(argv[3]));
+    vector<uint8_t> buf(WIDTH*HEIGHT*3/2+2);
+    uint8_t *data = buf.data() + 2; // udp在应用层分包sendto，buf[0] is cmd, buf[1] is 帧数量或帧序号
 
     for (size_t i = 0; i < 20; i++)
     {
-        camera_capture(grayData, &frameLen);
+        camera_capture(data, &frameLen);
 
-        printf("frameLen:%d\n", frameLen);
-        printf("frameCount:%lu\n", frameCount);
+        snprintf(name, sizeof(name), "frame_%lu.jpg", i);
+        save_data_to_file(data, frameLen, name);
 
         frameCount++;
-        printf("send len:%d\n", udpClient->send(grayData, 65507));
+        printf("JH ---frameLen:%d frameCount:%lu\n", frameLen, frameCount);
 
-        if(ret < 0)
-        {
-            printf("send data failed: %s\n", strerror(errno));
-            break;
-        }
+        printf("send len:%d\n", udpClient->send(data, frameLen));
     }
 
     return 0;

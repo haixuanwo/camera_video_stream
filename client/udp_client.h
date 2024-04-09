@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2024-04-08 20:56:50
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 09:10:46
+ * @LastEditTime: 2024-04-09 11:19:47
  * @Description: file content
  */
 
@@ -21,12 +21,15 @@
 #include <errno.h>
 #include <pthread.h>
 
+#define UDP_MAX_LEN 65507       // UDP sendto最大数据包长度
+#define UDP_MAX_DATA_LEN 65505  // UDP 1个字节帧类型, 1个字节帧数量或帧序号
+
 class UdpClient {
 public:
     UdpClient(const char* ip, int port);
     ~UdpClient();
 
-    int send(const uint8_t* data, uint32_t len);
+    int send(uint8_t* data, uint32_t len);
     int recv(uint8_t* data, uint32_t len);
 
 private:

@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2024-04-08 18:19:31
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-08 22:18:45
+ * @LastEditTime: 2024-04-09 11:00:55
  * @Description: file content
  */
 
@@ -22,9 +22,6 @@ using namespace std;
 #define WIDTH 1920
 #define HEIGHT 1080
 
-unsigned char grayData[WIDTH * HEIGHT];
-unsigned char grayData_t[WIDTH * HEIGHT];
-
 bool save_data_to_file(unsigned char *data, uint32_t len, const char *name)
 {
     FILE *fp = fopen(name, "wb");
@@ -34,9 +31,8 @@ bool save_data_to_file(unsigned char *data, uint32_t len, const char *name)
         return false;
     }
 
-    fwrite(grayData, 1, len, fp);
+    fwrite(data, 1, len, fp);
     fclose(fp);
-
     return true;
 }
 
@@ -51,9 +47,12 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    char name[128] = {0};
     auto udpServer = make_shared<UdpServer>(atoi(argv[1]));
     auto buf = vector<uint8_t>(WIDTH * HEIGHT*3/2, 0);
     // data->resize(WIDTH * HEIGHT*3/2);
+
+    uint32_t index = 0;
 
     while(1)
     {
@@ -61,7 +60,16 @@ int main(int argc, char **argv)
         if (len > 0)
         {
             cout << "recv len: " << len << endl;
+            for (size_t i = 0; i < 5; i++)
+            {
+                printf("%02x ", buf[i]);
+            }
+            printf("\n");
         }
+
+        snprintf(name, sizeof(name), "frame_%u.jpg", index);
+        save_data_to_file(buf.data(), len, name);
+        index++;
 
         #if 0
         cv::Mat gray(HEIGHT, WIDTH, CV_8UC1, grayData);
