@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2024-04-08 20:56:50
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-08 22:18:21
+ * @LastEditTime: 2024-04-09 13:51:10
  * @Description: file content
  */
 
@@ -26,8 +26,8 @@ public:
     UdpServer(int port);
     ~UdpServer();
 
-    int send(const uint8_t* data, uint32_t len);
-    int recv(uint8_t* data, uint32_t len);
+    uint32_t send(const uint8_t* data, uint32_t len);
+    uint32_t recv(uint8_t* data, uint32_t len);
 
 private:
     int sockfd_;

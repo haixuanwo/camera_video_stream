@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 11:13:53
+ * @LastEditTime: 2024-04-09 14:45:08
  * @Description: udp通信客户端
  */
 
@@ -58,7 +58,7 @@ UdpServer::~UdpServer()
     close(sockfd_);
 }
 
-int UdpServer::send(const uint8_t* data, uint32_t len)
+uint32_t UdpServer::send(const uint8_t* data, uint32_t len)
 {
     if (sockfd_ < 0 || nullptr == data || 0 == len)
     {
@@ -69,12 +69,12 @@ int UdpServer::send(const uint8_t* data, uint32_t len)
     return sendto(sockfd_, data, len, 0, (struct sockaddr *)&client_addr_, client_addrLen_);
 }
 
-int UdpServer::recv(uint8_t* data, uint32_t len)
+uint32_t UdpServer::recv(uint8_t* data, uint32_t len)
 {
     if (sockfd_ < 0 || nullptr == data || 0 == len)
     {
         printf("%s: invalid parameters\n", __func__);
-        return -1;
+        return 0;
     }
 
     int ret = -1;
@@ -82,13 +82,14 @@ int UdpServer::recv(uint8_t* data, uint32_t len)
     uint32_t sequence = 1;
     uint32_t sequence_max = 0; // 最大序列号
 
+    printf("JH --- recv start len: %u\n", len);
     while (1)
     {
         ret = recvfrom(sockfd_, data+recvedLen, len-recvedLen, 0, (struct sockaddr *)&client_addr_, &client_addrLen_);
         if (ret < 2) // 至少收到包头两个字节
         {
             printf("recvfrom fail, errno: %d\n", errno);
-            return -1;
+            return 0;
         }
 
         if (PACKET_FIRST == data[recvedLen])            // 第一个包
@@ -97,8 +98,8 @@ int UdpServer::recv(uint8_t* data, uint32_t len)
             sequence_max = data[recvedLen+1];
 
             // 去掉包头
-            memmove(data+recvedLen, data+recvedLen+2, ret - 2);
-            recvedLen += (ret - 2);
+            memmove(data, data+recvedLen+2, ret - 2);
+            recvedLen = (ret - 2);
             printf("JH --- PACKET_FIRST recvedLen[%u] sequence_max[%u]\n", recvedLen, sequence_max);
         }
         else if (PACKET_INTERMEDATE == data[recvedLen])  // 中间包
@@ -106,7 +107,7 @@ int UdpServer::recv(uint8_t* data, uint32_t len)
             if (sequence != data[recvedLen+1])
             {
                 printf("recv invalid sequence: %d, expected: %d\n", data[recvedLen+1], sequence);
-                return -1;
+                return 0;
             }
 
             // 去掉包头
@@ -125,7 +126,7 @@ int UdpServer::recv(uint8_t* data, uint32_t len)
         else
         {
             printf("recv invalid packet type: %d\n", data[recvedLen]);
-            return -1;
+            return 0;
         }
     }
 }

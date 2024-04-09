@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 11:30:14
+ * @LastEditTime: 2024-04-09 14:48:09
  * @Description: udp通信客户端
  */
 #include <cstdio>
@@ -40,8 +40,6 @@ bool save_data_to_file(unsigned char *data, uint32_t len, const char *name)
 
 int main(int argc, char **argv)
 {
-    int len;
-
     if (argc < 4)
     {
         printf("Please input camear index, ip and port\n");
@@ -59,26 +57,25 @@ int main(int argc, char **argv)
     camera_streamon();
 
     int frameLen = 0;
-    uint64_t frameCount = 0;
-
-    char name[128] = {0};
-
     auto udpClient = make_shared<UdpClient>(argv[2], atoi(argv[3]));
     vector<uint8_t> buf(WIDTH*HEIGHT*3/2+2);
     uint8_t *data = buf.data() + 2; // udp在应用层分包sendto，buf[0] is cmd, buf[1] is 帧数量或帧序号
 
-    // for (size_t i = 0; i < 20; i++)
+    // for (size_t i = 0; i < 200; i++)
     while (1)
     {
         camera_capture(data, &frameLen);
+        if (frameLen <= 0)
+        {
+            printf("capture frame failed\n");
+            continue;
+        }
 
+        // char name[128] = {0};
         // snprintf(name, sizeof(name), "frame_%lu.jpg", i);
         // save_data_to_file(data, frameLen, name);
 
-        frameCount++;
-        printf("JH ---frameLen:%d frameCount:%lu\n", frameLen, frameCount);
-
-        printf("send len:%d\n", udpClient->send(data, frameLen));
+        printf("JH ---frameLen:[%d]  send len:[%u]\n", frameLen, udpClient->send(data, frameLen));
     }
 
     return 0;

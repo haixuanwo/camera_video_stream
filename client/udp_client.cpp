@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 11:02:34
+ * @LastEditTime: 2024-04-09 14:01:09
  * @Description: udp通信客户端
  */
 #include<errno.h>
@@ -50,12 +50,12 @@ UdpClient::~UdpClient()
     close(sockfd_);
 }
 
-int UdpClient::send(uint8_t* data, uint32_t len)
+uint32_t UdpClient::send(uint8_t* data, uint32_t len)
 {
     if (sockfd_ < 0 || nullptr == data || 0 == len)
     {
         printf("%s: invalid parameters\n", __func__);
-        return -1;
+        return 0;
     }
 
     uint32_t sequence = 0;
@@ -85,14 +85,13 @@ int UdpClient::send(uint8_t* data, uint32_t len)
         if (ret < 0)
         {
             printf("sendto fail, errno: %d\n", errno);
-            return -1;
+            return 0;
         }
         sendedLen += (ret - 2); // 2 bytes for packet header
 
         printf("send[%d] bytes, sendedLen[%u] bytes sequence:[%u]\n", ret, sendedLen, sequence);
     }
     return sendedLen;
-    // return sendto(sockfd_, data, len, 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
 }
 
 int UdpClient::recv(uint8_t* data, uint32_t len)

@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2024-04-08 20:56:50
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 11:19:47
+ * @LastEditTime: 2024-04-09 14:00:57
  * @Description: file content
  */
 
@@ -29,7 +29,7 @@ public:
     UdpClient(const char* ip, int port);
     ~UdpClient();
 
-    int send(uint8_t* data, uint32_t len);
+    uint32_t send(uint8_t* data, uint32_t len);
     int recv(uint8_t* data, uint32_t len);
 
 private:

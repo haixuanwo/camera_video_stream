@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2024-04-08 18:19:31
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 11:50:07
+ * @LastEditTime: 2024-04-09 14:47:58
  * @Description: file content
  */
 
@@ -38,21 +38,15 @@ bool save_data_to_file(unsigned char *data, uint32_t len, const char *name)
 
 int main(int argc, char **argv)
 {
-
-    int len;
-
     if(argc < 2)
     {
         printf("Please input port\n");
         return -1;
     }
 
-    char name[128] = {0};
+    uint32_t len = 0;
     auto udpServer = make_shared<UdpServer>(atoi(argv[1]));
     auto buf = vector<uint8_t>(WIDTH * HEIGHT*3/2, 0);
-    // data->resize(WIDTH * HEIGHT*3/2);
-
-    // uint32_t index = 0;
 
     while(1)
     {
@@ -61,34 +55,17 @@ int main(int argc, char **argv)
         {
             continue;
         }
+        printf("recv len: %d\n", len);
 
-        cout << "recv len: " << len << endl;
-        for (size_t i = 0; i < 5; i++)
-        {
-            printf("%02x ", buf[i]);
-        }
-        printf("\n");
-
+        // static uint32_t index = 0;
+        // char name[128] = {0};
         // snprintf(name, sizeof(name), "frame_%u.jpg", index);
         // save_data_to_file(buf.data(), len, name);
         // index++;
 
-        cv::Mat buffer(1, len, CV_8UC3, buf.data());
-
-        // 将buffer中的数据解码为图像
-        cv::Mat image = cv::imdecode(buffer, cv::IMREAD_COLOR);
-
-        // cv::Mat image = cv::imdecode(cv::Mat(buf.data()), cv::IMREAD_COLOR);
-        // // cv::Mat image = cv::imdecode(cv::Mat(buf.data()), cv::IMREAD_COLOR);
+        cv::Mat image = cv::imdecode(cv::Mat(1, len, CV_8UC3, buf.data()), cv::IMREAD_COLOR);
         cv::imshow("test", image);
         cv::waitKey(10);
-
-        // cv::Mat gray(HEIGHT, WIDTH, CV_8UC1, buf.data());
-        // cv::Mat rgb;
-        // cv::cvtColor(gray, rgb, CV_GRAY2BGR);
-        // // face_func(rgb);
-        // cv::imshow("test", rgb);
-        // cv::waitKey(10);
     }
 
     return 0;

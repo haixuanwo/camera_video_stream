@@ -29,5 +29,5 @@ ${DIR_OBJ}/%.o:${DIR_SRC}/%.cpp
 .PHONY:clean
 
 clean:
-	rm ${DIR_OBJ}/*.o
+	rm *.o
 	rm ${TARGET}
