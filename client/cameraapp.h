@@ -19,6 +19,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
+#include <cstdint>
 
 #ifdef __USE_VIN_ISP__
 #include "AWIspApi.h"

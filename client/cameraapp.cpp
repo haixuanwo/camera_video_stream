@@ -156,7 +156,7 @@ int cam_init(int index,int width, int height)
 
     /* Query the status of a buffers */
     camera.buf_count = req.count;
-    int n_buffers = 0;
+    uint32_t n_buffers = 0;
     struct v4l2_buffer buf;
     printf(" reqbuf number is %d\n", camera.buf_count);
 

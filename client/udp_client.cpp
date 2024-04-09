@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 14:01:09
+ * @LastEditTime: 2024-04-09 15:05:59
  * @Description: udp通信客户端
  */
 #include<errno.h>
@@ -18,8 +18,6 @@
 #include <stdio.h>
 
 #include "udp_client.h"
-
-#define PORT 9999
 
 /**
  * @brief 包头类型
@@ -89,7 +87,7 @@ uint32_t UdpClient::send(uint8_t* data, uint32_t len)
         }
         sendedLen += (ret - 2); // 2 bytes for packet header
 
-        printf("send[%d] bytes, sendedLen[%u] bytes sequence:[%u]\n", ret, sendedLen, sequence);
+        // printf("send[%d] bytes, sendedLen[%u] bytes sequence:[%u]\n", ret, sendedLen, sequence);
     }
     return sendedLen;
 }

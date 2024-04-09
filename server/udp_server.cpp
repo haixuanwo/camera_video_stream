@@ -3,10 +3,9 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 14:45:08
+ * @LastEditTime: 2024-04-09 15:07:43
  * @Description: udp通信客户端
  */
-
 #include<errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -82,7 +81,6 @@ uint32_t UdpServer::recv(uint8_t* data, uint32_t len)
     uint32_t sequence = 1;
     uint32_t sequence_max = 0; // 最大序列号
 
-    printf("JH --- recv start len: %u\n", len);
     while (1)
     {
         ret = recvfrom(sockfd_, data+recvedLen, len-recvedLen, 0, (struct sockaddr *)&client_addr_, &client_addrLen_);
@@ -100,24 +98,24 @@ uint32_t UdpServer::recv(uint8_t* data, uint32_t len)
             // 去掉包头
             memmove(data, data+recvedLen+2, ret - 2);
             recvedLen = (ret - 2);
-            printf("JH --- PACKET_FIRST recvedLen[%u] sequence_max[%u]\n", recvedLen, sequence_max);
+            // printf("JH --- PACKET_FIRST recvedLen[%u] sequence_max[%u]\n", recvedLen, sequence_max);
         }
         else if (PACKET_INTERMEDATE == data[recvedLen])  // 中间包
         {
             if (sequence != data[recvedLen+1])
             {
-                printf("recv invalid sequence: %d, expected: %d\n", data[recvedLen+1], sequence);
+                // printf("recv invalid sequence: %d, expected: %d\n", data[recvedLen+1], sequence);
                 return 0;
             }
 
             // 去掉包头
             memmove(data+recvedLen, data+recvedLen+2, ret - 2);
             recvedLen += (ret - 2);
-            printf("JH --- PACKET_INTERMEDATE recvedLen[%u] sequence[%u]\n", recvedLen, sequence);
+            // printf("JH --- PACKET_INTERMEDATE recvedLen[%u] sequence[%u]\n", recvedLen, sequence);
 
             if (sequence_max == sequence)
             {
-                printf("recv all data, sequence_max: %d, sequence: %d\n", sequence_max, sequence);
+                // printf("recv all data, sequence_max: %d, sequence: %d\n", sequence_max, sequence);
                 return recvedLen;
             }
 

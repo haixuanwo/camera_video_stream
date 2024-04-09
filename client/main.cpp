@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 14:48:09
+ * @LastEditTime: 2024-04-09 15:16:20
  * @Description: udp通信客户端
  */
 #include <cstdio>
@@ -11,10 +11,6 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-
-extern "C" {
-#include <sys/time.h>
-}
 
 #include "cameraapp.h"
 #include "udp_client.h"
@@ -75,7 +71,7 @@ int main(int argc, char **argv)
         // snprintf(name, sizeof(name), "frame_%lu.jpg", i);
         // save_data_to_file(data, frameLen, name);
 
-        printf("JH ---frameLen:[%d]  send len:[%u]\n", frameLen, udpClient->send(data, frameLen));
+        udpClient->send(data, frameLen);
     }
 
     return 0;

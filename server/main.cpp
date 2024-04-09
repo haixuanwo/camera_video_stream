@@ -3,10 +3,9 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2024-04-08 18:19:31
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 14:47:58
+ * @LastEditTime: 2024-04-09 15:07:29
  * @Description: file content
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <opencv2/calib3d.hpp>
@@ -15,6 +14,10 @@
 #include <sys/time.h>
 #include <memory>
 #include <vector>
+#include <iostream>
+#include <chrono>
+#include <ctime>
+
 #include "udp_server.h"
 
 using namespace std;
@@ -36,6 +39,35 @@ bool save_data_to_file(unsigned char *data, uint32_t len, const char *name)
     return true;
 }
 
+void test_fps(void)
+{
+    // 获取当前时间点
+    auto now = std::chrono::system_clock::now();
+
+    // 将当前时间点转换为毫秒数
+    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+
+    // 获取毫秒数
+    static uint64_t last_ms = 0;
+    auto now_value = now_ms.time_since_epoch().count();
+
+    static uint32_t count = 0;
+    if (0 == count)
+    {
+        count = 1;
+        last_ms = now_value;
+        return;
+    }
+
+    count++;
+    if ((now_value - last_ms) > 3000)
+    {
+        printf("JH --- fps[%u] ----\n", count/3);
+        count = 0;
+        last_ms = now_value;
+    }
+}
+
 int main(int argc, char **argv)
 {
     if(argc < 2)
@@ -55,7 +87,6 @@ int main(int argc, char **argv)
         {
             continue;
         }
-        printf("recv len: %d\n", len);
 
         // static uint32_t index = 0;
         // char name[128] = {0};
@@ -63,6 +94,7 @@ int main(int argc, char **argv)
         // save_data_to_file(buf.data(), len, name);
         // index++;
 
+        test_fps();
         cv::Mat image = cv::imdecode(cv::Mat(1, len, CV_8UC3, buf.data()), cv::IMREAD_COLOR);
         cv::imshow("test", image);
         cv::waitKey(10);
