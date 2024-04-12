@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2024-04-08 18:19:31
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-09 15:07:29
+ * @LastEditTime: 2024-04-12 16:13:24
  * @Description: file content
  */
 #include <stdio.h>
@@ -18,7 +18,10 @@
 #include <chrono>
 #include <ctime>
 
-#include "udp_server.h"
+// #include "udp_server.h"
+#include "../common/tcp_socket.h"
+#include "../common/common.h"
+#include "../common/protocol.h"
 
 using namespace std;
 
@@ -68,6 +71,7 @@ void test_fps(void)
     }
 }
 
+
 int main(int argc, char **argv)
 {
     if(argc < 2)
@@ -76,28 +80,55 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    uint32_t len = 0;
-    auto udpServer = make_shared<UdpServer>(atoi(argv[1]));
-    auto buf = vector<uint8_t>(WIDTH * HEIGHT*3/2, 0);
+    auto protocol = make_shared<Protocol>();
 
-    while(1)
+    uint32_t len = 0;
+    // auto udpServer = make_shared<UdpServer>(atoi(argv[1]));
+    auto server = make_shared<Socket>("0.0.0.0", atoi(argv[1]), SERVER);
+    server->init();
+
+    auto buf = vector<uint8_t>(WIDTH * HEIGHT*3/2, 0);
+    auto frame = vector<uint8_t>(WIDTH * HEIGHT*3/2, 0);
+    uint32_t frameLen = 0;
+
+    while (true)
     {
-        len = udpServer->recv(buf.data(), buf.size());
-        if (len <= 0)
+        if (false == server->accept_client())
         {
-            continue;
+            return -1;
         }
 
-        // static uint32_t index = 0;
-        // char name[128] = {0};
-        // snprintf(name, sizeof(name), "frame_%u.jpg", index);
-        // save_data_to_file(buf.data(), len, name);
-        // index++;
+        while(1)
+        {
+            // len = udpServer->recv(buf.data(), buf.size());
+            len = server->read((char *)buf.data(), buf.size());
+            if (len <= 0)
+            {
+                break;
+            }
 
-        test_fps();
-        cv::Mat image = cv::imdecode(cv::Mat(1, len, CV_8UC3, buf.data()), cv::IMREAD_COLOR);
-        cv::imshow("test", image);
-        cv::waitKey(10);
+            if (!protocol->get_frame_from_data(buf.data(), len, frame.data(), frameLen))
+            {
+                continue;
+            }
+
+            // print_hex_data("frame", frame.data(), frameLen);
+            // continue;
+
+            // static uint32_t index = 0;
+            // char name[128] = {0};
+            // snprintf(name, sizeof(name), "frame_%u.jpg", index);
+            // save_data_to_file(buf.data(), len, name);
+            // index++;
+
+            test_fps();
+
+            #if 0
+            cv::Mat image = cv::imdecode(cv::Mat(HEIGHT, WIDTH, CV_8UC3, frame.data()), cv::IMREAD_COLOR);
+            cv::imshow("test", image);
+            cv::waitKey(3);
+            #endif
+        }
     }
 
     return 0;

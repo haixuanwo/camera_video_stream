@@ -8,7 +8,11 @@ DIR_OBJ = .
 #DIR_BIN = ./bin
 
 SRC = $(wildcard ${DIR_SRC}/*.cpp)
+# SRC += $(wildcard ../common/*.cpp)
+
 OBJ = $(patsubst %.cpp,${DIR_OBJ}/%.o,$(notdir ${SRC}))
+OBJ += ../common/common.o
+OBJ += ../common/protocol.o
 
 TARGET = main_client
 
