@@ -2,13 +2,11 @@
 ###
  # @Author: Clark
  # @Email: haixuanwoTxh@gmail.com
- # @Date: 2024-04-08 18:19:18
+ # @Date: 2024-04-13 11:45:42
  # @LastEditors: Clark
- # @LastEditTime: 2024-04-09 11:44:00
+ # @LastEditTime: 2024-04-13 11:45:40
  # @Description: file content
 ###
-
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:`pwd`/lib/opencv
 
 make clean
 make
@@ -17,4 +15,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-./main_server 6666
+echo 1 | sudo -S ./main_client 0 192.168.2.59 6666

@@ -34,5 +34,5 @@ ${DIR_OBJ}/%.o:${DIR_SRC}/%.cpp
 
 .PHONY:clean
 clean:
-	rm *.o
+	rm -f *.o ../common/*.o
 	rm ${TARGET}

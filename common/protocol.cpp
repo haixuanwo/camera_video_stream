@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2024-04-11 09:24:26
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-12 15:22:21
+ * @LastEditTime: 2024-04-13 10:18:05
  * @Description: file content
  */
 #include "protocol.h"
@@ -141,7 +141,7 @@ bool Protocol::parse_packet(uint8_t* frame, uint32_t &frameLen)
         uint32_t len = get_value(m_data.data() + index);
         if (len > (m_len - MIN_PACKET_LEN))
         {
-            std::cout<<"JH --- "<< __FUNCTION__ <<" data not enough frame len:" << len << endl;
+            // std::cout<<"JH --- "<< __FUNCTION__ <<" data not enough frame len:" << len << endl;
             return false;
         }
         else if (len > MAX_PACKET_SIZE)
@@ -167,7 +167,7 @@ bool Protocol::parse_packet(uint8_t* frame, uint32_t &frameLen)
         // 获取帧数据
         memcpy(frame, m_data.data() + index, len);
         frameLen = len;
-        std::cout<< "JH --- " << __FUNCTION__ << " frameLen: " << frameLen << endl;
+        // std::cout<< "JH --- " << __FUNCTION__ << " frameLen: " << frameLen << endl;
 
         // 调整剩下数据位置
         m_len -= (len + MIN_PACKET_LEN);

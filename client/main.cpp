@@ -3,7 +3,7 @@
  * @Email: haixuanwoTxh@gmail.com
  * @Date: 2021-12-18 10:02:46
  * @LastEditors: Clark
- * @LastEditTime: 2024-04-12 15:20:16
+ * @LastEditTime: 2024-04-13 10:03:01
  * @Description: udp通信客户端
  */
 #include <cstdio>
@@ -19,23 +19,6 @@
 #include "../common/protocol.h"
 
 using namespace std;
-
-#define WIDTH 1920
-#define HEIGHT 1080
-
-bool save_data_to_file(unsigned char *data, uint32_t len, const char *name)
-{
-    FILE *fp = fopen(name, "wb");
-    if(fp == NULL)
-    {
-        printf("open file %s failed\n", name);
-        return false;
-    }
-
-    fwrite(data, 1, len, fp);
-    fclose(fp);
-    return true;
-}
 
 int main(int argc, char **argv)
 {
@@ -90,7 +73,7 @@ int main(int argc, char **argv)
 
         client->writen(packet.data(), packetLen);
 
-        print_hex_data("recv len", packet.data(), frameLen);
+        // print_hex_data("recv len", packet.data(), frameLen);
     }
 
     return 0;
