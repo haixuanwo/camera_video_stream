@@ -5,12 +5,13 @@
 #include "muduo/net/EventLoop.h"
 #include "muduo/net/TcpServer.h"
 
+#include "cameraapp.h"
 #include "../common/common.h"
-#include "display_image.h"
 
 #include <set>
 #include <stdio.h>
 #include <unistd.h>
+#include <thread>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -28,8 +29,7 @@ class ChatServer : noncopyable
     server_.setMessageCallback(
         std::bind(&LengthHeaderCodec::onMessage, &codec_, _1, _2, _3));
 
-    displayImage = std::make_shared<DisplayImage>();
-    displayImage->startThread();
+    sendThread = std::make_shared<std::thread>(std::bind(&ChatServer::sendThreadFunc, this));
   }
 
   void start()
@@ -66,15 +66,45 @@ class ChatServer : noncopyable
     //     LOG_INFO << "recv size: " << message.size() << " to " << (*it)->peerAddress().toIpPort();
     // }
 
-    displayImage->push(reinterpret_cast<const uint8_t*>(message.data()), message.size());
+    // displayImage->push(reinterpret_cast<const uint8_t*>(message.data()), message.size());
   }
+
+    static void sendThreadFunc(void *arg)
+    {
+        ChatServer* server = static_cast<ChatServer*>(arg);
+
+        if (cam_init(0, WIDTH, HEIGHT) < 0)
+        {
+            LOG_INFO << "cam init fail";
+            return;
+        }
+        camera_streamon();
+
+        int frameLen = -1;
+        char *buf = new char[WIDTH*HEIGHT*3/2];
+        while (1)
+        {
+            if (camera_capture(buf, &frameLen) < 0)
+            {
+                std::this_thread::yield();
+                continue;
+            }
+
+            for (ConnectionList::iterator it = server->connections_.begin();
+                it != server->connections_.end();
+                ++it)
+            {
+                server->codec_.send(get_pointer(*it), std::string(buf, frameLen));
+                // LOG_INFO << "send size: " << frameLen << " to " << (*it)->peerAddress().toIpPort();
+            }
+        }
+    }
 
   typedef std::set<TcpConnectionPtr> ConnectionList;
   TcpServer server_;
   LengthHeaderCodec codec_;
   ConnectionList connections_;
-
-  std::shared_ptr<DisplayImage> displayImage;
+  std::shared_ptr<std::thread> sendThread;
 };
 
 int main(int argc, char* argv[])

@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <thread>
 
-#include "cameraapp.h"
+#include "display_image.h"
 #include "../common/common.h"
 
 using namespace muduo;
@@ -28,6 +28,9 @@ class ChatClient : noncopyable
     client_.setMessageCallback(
         std::bind(&LengthHeaderCodec::onMessage, &codec_, _1, _2, _3));
     client_.enableRetry();
+
+    displayImage = std::make_shared<DisplayImage>();
+    displayImage->startThread();
   }
 
   void connect()
@@ -71,13 +74,15 @@ class ChatClient : noncopyable
                        const string& message,
                        Timestamp)
   {
-    printf("<<< %s\n", message.c_str());
+    // printf("<<< %s\n", message.c_str());
+    displayImage->push(reinterpret_cast<const uint8_t*>(message.data()), message.size());
   }
 
   TcpClient client_;
   LengthHeaderCodec codec_;
   MutexLock mutex_;
   TcpConnectionPtr connection_ GUARDED_BY(mutex_);
+  std::shared_ptr<DisplayImage> displayImage;
 };
 
 int main(int argc, char* argv[])
@@ -85,12 +90,7 @@ int main(int argc, char* argv[])
   LOG_INFO << "pid = " << getpid();
   if (argc > 2)
   {
-    if (cam_init(0, WIDTH, HEIGHT) < 0)
-    {
-        LOG_INFO << "cam init fail";
-        return -1;
-    }
-    camera_streamon();
+
 
     EventLoopThread loopThread;
     uint16_t port = static_cast<uint16_t>(atoi(argv[2]));
@@ -98,23 +98,14 @@ int main(int argc, char* argv[])
 
     ChatClient client(loopThread.startLoop(), serverAddr);
     client.connect();
-    std::string line;
-
-    int frameLen = -1;
-    char *buf = new char[WIDTH*HEIGHT*3/2];
+    // std::string line;
 
     while (1)
     {
-        if (camera_capture(buf, &frameLen) < 0)
-        {
-            std::this_thread::yield();
-            continue;
-        }
-
-        client.write(std::string(buf, frameLen));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100000000));
+        // client.write(std::string(buf, frameLen));
         // LOG_INFO << "send frame len: " << frameLen;
     }
-
 
     client.disconnect();
     CurrentThread::sleepUsec(1000*1000);  // wait for disconnect, see ace/logging/client.cc
